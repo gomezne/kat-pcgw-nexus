@@ -5,13 +5,17 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Printing;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 using System.Windows.Xps;
 using IBizLibrary;
 using KAT_Helper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace kat_pcgw_nexus
 {
@@ -84,6 +88,7 @@ namespace kat_pcgw_nexus
         {
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
             public string nexusIPv4;
+            [MarshalAs(UnmanagedType.U4)]
             public int devicesCount;
         }
 
@@ -91,8 +96,8 @@ namespace kat_pcgw_nexus
         public struct KAT_NEXUS_DEVICE
         {
             public double lastUpdate;
-            public ushort vid;
             public ushort pid;
+            public ushort vid;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 13)]
             public string serialNo;
             [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I1, SizeConst = 3)]
@@ -167,6 +172,7 @@ namespace kat_pcgw_nexus
         {
             try
             {
+                // Debug.WriteLine("OnBroadcastPacket");
                 IPEndPoint? remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 if (BroadcastUdpClient == null)
                     return;
@@ -189,7 +195,7 @@ namespace kat_pcgw_nexus
                         for (int i = 0; i < header.devicesCount; i++)
                         {
                             var dev = ReadPtrStructAndAdvance<KAT_NEXUS_DEVICE>(ref ptr);
-                            message += $"[{dev.serialNo} @ {dev.lastUpdate}]";
+                            message += $"[:{dev.nexusPort} {dev.serialNo} @ {dev.lastUpdate}]";
                         }
                     }
                     finally
@@ -204,9 +210,13 @@ namespace kat_pcgw_nexus
             {
                 // Handle clean-up when udpClient is disposed
             }
+            catch (SocketException)
+            {
+                // M'kay5
+            }
         }
 
-        String TreadmillSn = ""; // The serial No of treadmill we connected to
+        string TreadmillSn = ""; // The serial No of treadmill we connected to
         IPAddress? ClientAddress;
         List<int> ClientPorts = new(8);
         List<double> LastPings = new(8);
@@ -214,11 +224,13 @@ namespace kat_pcgw_nexus
         Int64 GoodPackets = 0;
         Int64 BadPackets = 0;
         Int64 UpdatePackets = 0;
+        double firstUpdate = 0.0;
 
         public static double GetCurrentTimeDNative() => (DateTime.UtcNow - DateTime.UnixEpoch).Ticks / 10_000_000.0;
 
         private void BroadcastTimer_Elapsed(object? sender, EventArgs e)
         {
+            // Debug.WriteLine("BroadcastTimer_Elapsed");
             var nexus = new KAT_NEXUS_PACKET { devicesCount = 0, nexusIPv4 = LocalIPAddress.GetLocalIPAddress() ?? "127.0.0.1" };
             var dev = new KAT_NEXUS_DEVICE { }.Initialize();
 
@@ -257,7 +269,24 @@ namespace kat_pcgw_nexus
                 dev.sensorPackets[0] = Convert.ToInt32(deviceConnectionModel.sensorStatus[0]);
                 dev.sensorPackets[1] = Convert.ToInt32(deviceConnectionModel.sensorStatus[1]);
                 dev.sensorPackets[2] = Convert.ToInt32(deviceConnectionModel.sensorStatus[2]);
-                dev.lastUpdate = deviceConnectionModel.lastUpdateTime;
+                dev.sensorConnected[0] = deviceConnectionModel.sensorStatus[0] > 0;
+                dev.sensorConnected[1] = deviceConnectionModel.sensorStatus[1] > 0;
+                dev.sensorConnected[2] = deviceConnectionModel.sensorStatus[2] > 0;
+                if (LastUpdateData.deviceDatas != null)
+                {
+                    dev.sensorBattery[0] = LastUpdateData.deviceDatas[0].batteryLevel;
+                    dev.sensorBattery[1] = LastUpdateData.deviceDatas[1].batteryLevel;
+                    dev.sensorBattery[2] = LastUpdateData.deviceDatas[2].batteryLevel;
+                }
+                if (firstUpdate == 0 && deviceConnectionModel.lastUpdateTime > 0)
+                {
+                    firstUpdate = deviceConnectionModel.lastUpdateTime;
+                }
+                dev.lastUpdate = deviceConnectionModel.lastUpdateTime - firstUpdate;
+            }
+            else
+            {
+                firstUpdate = 0;
             }
 
             var buffer = new byte[512];
@@ -274,18 +303,20 @@ namespace kat_pcgw_nexus
                     WriteStructToPtrAndAdvance(dev, ref ptr);
                 }
                 length = (int)(ptr - gch.AddrOfPinnedObject());
+
+                BroadcastUdpClient?.Send(buffer, length, new IPEndPoint(IPAddress.Broadcast, 1181));
             }
             finally
             {
                 gch.Free();
             }
-            BroadcastUdpClient?.Send(buffer, length, new IPEndPoint(IPAddress.Broadcast, 1181));
         }
 
         private void OnNexusUdpPacket(IAsyncResult ar)
         {
             try
             {
+                Debug.WriteLine("OnNexusUdpPacket");
                 if (NexusUdpClient == null)
                     return;
                 IPEndPoint? remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -299,6 +330,10 @@ namespace kat_pcgw_nexus
             catch (ObjectDisposedException)
             {
                 // Handle clean-up when udpClient is disposed
+            }
+            catch (System.Net.Sockets.SocketException)
+            {
+                // Disconnected? okay, such is life
             }
         }
 
@@ -333,6 +368,7 @@ namespace kat_pcgw_nexus
                 BadPackets++;
                 return;
             }
+            Debug.WriteLine("Nexus CMD: " + receivedBytes.Length + " @ " + receivedBytes[2]);
             var handled = (NexusCommands)receivedBytes[2] switch {
                 NexusCommands.Ping => Cmd_ClientPing(receivedBytes, remoteEndPoint),
                 NexusCommands.Pong => true, // Cmd_ClientPong(receivedBytes, remoteEndPoint),
@@ -585,6 +621,7 @@ namespace kat_pcgw_nexus
 
         private void ClientTimer_Elapsed(object? sender, EventArgs e)
         {
+            Debug.WriteLine("ClientTimer_Elapsed");
             if (ClientAddress == null)
             {
                 clientTimer.Stop();
