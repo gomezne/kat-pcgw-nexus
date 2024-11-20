@@ -172,7 +172,6 @@ namespace kat_pcgw_nexus
         {
             try
             {
-                // Debug.WriteLine("OnBroadcastPacket");
                 IPEndPoint? remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 if (BroadcastUdpClient == null)
                     return;
@@ -230,7 +229,6 @@ namespace kat_pcgw_nexus
 
         private void BroadcastTimer_Elapsed(object? sender, EventArgs e)
         {
-            // Debug.WriteLine("BroadcastTimer_Elapsed");
             var nexus = new KAT_NEXUS_PACKET { devicesCount = 0, nexusIPv4 = LocalIPAddress.GetLocalIPAddress() ?? "127.0.0.1" };
             var dev = new KAT_NEXUS_DEVICE { }.Initialize();
 
@@ -316,7 +314,6 @@ namespace kat_pcgw_nexus
         {
             try
             {
-                Debug.WriteLine("OnNexusUdpPacket");
                 if (NexusUdpClient == null)
                     return;
                 IPEndPoint? remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -368,7 +365,7 @@ namespace kat_pcgw_nexus
                 BadPackets++;
                 return;
             }
-            Debug.WriteLine("Nexus CMD: " + receivedBytes.Length + " @ " + receivedBytes[2]);
+            // Debug.WriteLine("Nexus CMD: " + receivedBytes.Length + " @ " + ((NexusCommands)(receivedBytes[2])).ToString());
             var handled = (NexusCommands)receivedBytes[2] switch {
                 NexusCommands.Ping => Cmd_ClientPing(receivedBytes, remoteEndPoint),
                 NexusCommands.Pong => true, // Cmd_ClientPong(receivedBytes, remoteEndPoint),
@@ -463,7 +460,7 @@ namespace kat_pcgw_nexus
         private bool Cmd_ClientDisconnect(byte[] receivedBytes, IPEndPoint remoteEndPoint)
         {
             if (receivedBytes.Length < 7) return false;
-            if (ClientAddress != remoteEndPoint.Address)
+            if (!ClientAddress.Equals(remoteEndPoint.Address))
                 return false;
 
             var port = BitConverter.ToInt32(receivedBytes, 3);
@@ -492,7 +489,8 @@ namespace kat_pcgw_nexus
             var connected = false;
             var status = (byte)0;
             var msg = "";
-            if (ClientAddress != null && ClientAddress != remoteEndPoint.Address)
+
+            if (ClientAddress != null && !ClientAddress.Equals(remoteEndPoint.Address))
             {
                 if (!force)
                 {
@@ -508,19 +506,21 @@ namespace kat_pcgw_nexus
                     ClientAddress = null;
                 }
             }
+
+            var now = GetCurrentTimeDNative();
             if (ClientAddress == null)
             {
                 ClientAddress = remoteEndPoint.Address;
                 ClientPorts.Clear();
                 ClientPorts.Add(port);
                 LastPings.Clear();
-                LastPings.Add(0.0d);
+                LastPings.Add(now);
                 connected = true;
                 status = 0;
                 msg = TreadmillSn;
                 clientTimer.Start();
             }
-            else if (ClientAddress == remoteEndPoint.Address)
+            else if (ClientAddress.Equals(remoteEndPoint.Address))
             {
                 if (ClientPorts.Contains(port))
                 {
@@ -531,7 +531,7 @@ namespace kat_pcgw_nexus
                 else if (ClientPorts.Count < 8)
                 {
                     ClientPorts.Add(port);
-                    LastPings.Add(0.0d);
+                    LastPings.Add(now);
                     connected = true;
                     status = 0;
                     msg = TreadmillSn;
@@ -543,8 +543,9 @@ namespace kat_pcgw_nexus
                     msg = "Reject: limit";
                 }
             }
+
             byte[] msgBytes = Encoding.ASCII.GetBytes(msg);
-            byte[] connection = new byte[msgBytes.Length + 10];
+            byte[] connection = new byte[260];
             connection[0] = 84;
             connection[1] = 11;
             connection[2] = (byte)NexusCmdByte.ConnectResult;
@@ -552,7 +553,8 @@ namespace kat_pcgw_nexus
             connection[4] = status;
             BitConverter.GetBytes((int)3500).CopyTo(connection, 5);
             msgBytes.CopyTo(connection, 9);
-            connection[connection.Length - 1] = 0; // Well, it's zero already, but won't hurt :D
+            connection[9 + msg.Length] = 0; // Well, it's zero already, but won't hurt :D
+            Debug.WriteLine($"Connection result: {connected}/{status}/{msg}. Current connection: {ClientAddress.ToString()}:[{string.Join(",", ClientPorts)}]");
             var sent = NexusUdpClient?.Send(connection, new IPEndPoint(ClientAddress, port));
             return connected && (sent == connection.Length);
         }
@@ -571,7 +573,7 @@ namespace kat_pcgw_nexus
         private bool Cmd_ClientPing(byte[] receivedBytes, IPEndPoint remoteEndPoint)
         {
             if (receivedBytes.Length < 15) return false;
-            if (receivedBytes.Length < 19) Array.Resize(ref receivedBytes, 19);
+            if (receivedBytes.Length < 259) Array.Resize(ref receivedBytes, 259);
             var clientPort = BitConverter.ToInt32(receivedBytes, 11);
             var now = GetCurrentTimeDNative();
             BitConverter.GetBytes(now).CopyTo(receivedBytes, 11);
@@ -585,7 +587,7 @@ namespace kat_pcgw_nexus
                 LastPings.Add(now);
                 receivedBytes[2] = (Byte)NexusCmdByte.Pong;
             }
-            else if (remoteEndPoint.Address != ClientAddress)
+            else if (!ClientAddress.Equals(remoteEndPoint.Address))
             {
                 // Ping from wrong address: stale client? reset their connection
                 receivedBytes[2] = (byte)NexusCmdByte.Reset;
@@ -621,7 +623,6 @@ namespace kat_pcgw_nexus
 
         private void ClientTimer_Elapsed(object? sender, EventArgs e)
         {
-            Debug.WriteLine("ClientTimer_Elapsed");
             if (ClientAddress == null)
             {
                 clientTimer.Stop();
