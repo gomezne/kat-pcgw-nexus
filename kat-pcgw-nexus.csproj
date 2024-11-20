@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="installer\**" />
+    <EmbeddedResource Remove="installer\**" />
+    <None Remove="installer\**" />
+    <Page Remove="installer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MultimediaTimer" Version="1.0.1" />
   </ItemGroup>
 
