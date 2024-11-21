@@ -25,14 +25,22 @@
 			<ComponentRef Id="KatPcgwNexus" />
 		</Feature>
 	
-		<Directory Id="INSTALLDIR" Name="Path To Kat Gateway">
+		<Directory Id="INSTALLDIR">
 			<Component Id="KatPcgwNexus" Guid="{91B080B6-FDCF-4D0D-A0B2-438A5CB9BAC0}">
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.exe" />
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.dll" />
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.runtimeconfig.json" />
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.deps.json" />
 				<File  Source="..\bin\release\net8.0-windows\MultimediaTimer.dll" />
+				<RegistryValue Root="HKCU" Key="Software\datacompboy\KAT PC Gateway Nexus" Name="installed" Type="integer" Value="1" KeyPath="true" />
+				<Shortcut Name="KAT PCGW Nexus" Directory="ShortcutFolder" Target="[INSTALLDIR]\kat-pcgw-nexus.exe" />
+				<Shortcut Name="KAT PCGW Nexus" Directory="DesktopFolder" Target="[INSTALLDIR]\kat-pcgw-nexus.exe" />
+				<RemoveFolder Directory="ShortcutFolder" On="uninstall" />
 			</Component>
 		</Directory>
+		<StandardDirectory Id="ProgramMenuFolder">
+			<Directory Id="ShortcutFolder" Name="datacompboy" />
+		</StandardDirectory>
+		<StandardDirectory Id="DesktopFolder" />
 	</Package>
 </Wix>
