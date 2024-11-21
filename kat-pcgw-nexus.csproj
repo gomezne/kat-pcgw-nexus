@@ -10,15 +10,26 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PandocOutputDir>$(MSBuildThisFileDirectory)$(OutputPath)</PandocOutputDir>
+    <PandocOutputFormat>rtf</PandocOutputFormat>
+	<PandocTableOfContents>false</PandocTableOfContents>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Remove="installer\**" />
     <EmbeddedResource Remove="installer\**" />
     <None Remove="installer\**" />
     <Page Remove="installer\**" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="README.rtf" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MultimediaTimer" Version="1.0.1" />
+    <PackageReference Include="PandocTasks" Version="0.1.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +39,10 @@
     <Reference Include="KAT_Helper">
       <HintPath>..\..\..\..\..\Program Files (x86)\KAT Gateway\KAT_Helper.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Pandoc Include="README.md" />
   </ItemGroup>
 
 </Project>

@@ -1,35 +1,38 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.0.0.0" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
+		<MediaTemplate EmbedCab="yes" />
+
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
-		<Property Id="SERVICE_INSTALLED">
+		<Property Id="SERVICE_INSTALLED" ComplianceCheck="yes" Admin="yes" Secure="yes">
 			<RegistrySearch Id="ServiceInstalledSearch" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\KAT Gateway Service" Name="ImagePath" Type="raw" />
 		</Property>
 
-		<!-- Abort installation if the service is not installed or disabled -->
-		<Launch Condition="SERVICE_INSTALLED" Message="The required service 'KAT Gateway Service' is not installed. Please install the KAT Gateway 2.2.5 or greater." />
+		<Launch Condition="SERVICE_INSTALLED or Installed" Message="The required service 'KAT Gateway Service' is not installed. Please install the KAT Gateway 2.2.5 or greater. [Installed] OR [SERVICE_INSTALLED]" />
 
-		<CustomAction Id="SetInstallDirFromImagePath" Script="vbscript" ScriptSourceFile="C:\Users\datacompboy\source\repos\kat-pcgw-nexus\installer\SetInstallDirFromImagePath.vbs" />
-		<InstallExecuteSequence>
-			<Custom Action="SetInstallDirFromImagePath" Before="CostFinalize" />
-		</InstallExecuteSequence>
+		<CustomAction Id="SetInstallDir" Script="jscript" ScriptSourceFile="SetInstallDir.js" />
 
-		<!-- Directories -->
-		
+		<InstallUISequence>
+			<Custom Action="SetInstallDir" Before="CostInitialize" />
+		</InstallUISequence>
+
+		<WixVariable Id="WixUIBannerBmp" Value="empty.bmp" />
+		<WixVariable Id="WixUIDialogBmp" Value="empty.bmp" />
+		<WixVariable Id="WixUILicenseRtf" Value="../README.rtf" />
+		<ui:WixUI Id="WixUI_Minimal" />
 
 		<Feature Id="ProductFeature" Title="KAT PC Gateway Nexus" Level="1">
 			<ComponentRef Id="KatPcgwNexus" />
 		</Feature>
 	
-			<Directory Id="INSTALLDIR" Name="Path To Kat Gateway">
-				<Component Id="KatPcgwNexus" Guid="{91B080B6-FDCF-4D0D-A0B2-438A5CB9BAC0}">
-					<File Id="kat_pcgw_nexus.exe" Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.exe" />
-					<File Id="kat_pcgw_nexus.dll" Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.dll" />
-					<File Id="kat_pcgw_nexus.runtimeconfig.json" Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.runtimeconfig.json" />
-					<File Id="kat_pcgw_nexus.deps.json" Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.deps.json" />
-					<File Id="MultimediaTimer.dll" Source="..\bin\release\net8.0-windows\MultimediaTimer.dll" />
-				</Component>
-			</Directory>
-		</Package>
-
+		<Directory Id="INSTALLDIR" Name="Path To Kat Gateway">
+			<Component Id="KatPcgwNexus" Guid="{91B080B6-FDCF-4D0D-A0B2-438A5CB9BAC0}">
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.exe" />
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.dll" />
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.runtimeconfig.json" />
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.deps.json" />
+				<File  Source="..\bin\release\net8.0-windows\MultimediaTimer.dll" />
+			</Component>
+		</Directory>
+	</Package>
 </Wix>
