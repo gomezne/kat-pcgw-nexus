@@ -7,8 +7,24 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="JsonTextBox" 
+                 Grid.Row="0"
+                 HorizontalAlignment="Stretch" 
+                 VerticalAlignment="Top" 
+                 TextWrapping="NoWrap" 
+                 IsReadOnly="True" 
+                 VerticalScrollBarVisibility="Disabled" 
+                 HorizontalScrollBarVisibility="Auto" 
+                 Margin="0" 
+                 Height="Auto" />
+
         <TextBox x:Name="ReceivedDataTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                 TextWrapping="Wrap" IsReadOnly="True"/>
+                 Grid.Row="1" TextWrapping="Wrap" IsReadOnly="True"/>
 
     </Grid>
 </Window>
