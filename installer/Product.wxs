@@ -1,5 +1,5 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.0.0.0" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
+	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.1.0.0" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
 		<MediaTemplate EmbedCab="yes" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -13,8 +13,11 @@
 		<CustomAction Id="SetInstallDir" Script="jscript" ScriptSourceFile="SetInstallDir.js" />
 
 		<InstallUISequence>
-			<Custom Action="SetInstallDir" Before="CostInitialize" />
+			<Custom Action="SetInstallDir" Before="CostInitialize" Condition="SERVICE_INSTALLED" />
 		</InstallUISequence>
+		<InstallExecuteSequence>
+			<Custom Action="SetInstallDir" Before="CostInitialize" Condition="SERVICE_INSTALLED"  />
+		</InstallExecuteSequence>
 
 		<WixVariable Id="WixUIBannerBmp" Value="empty.bmp" />
 		<WixVariable Id="WixUIDialogBmp" Value="empty.bmp" />
@@ -27,8 +30,8 @@
 	
 		<Directory Id="INSTALLDIR">
 			<Component Id="KatPcgwNexus" Guid="{91B080B6-FDCF-4D0D-A0B2-438A5CB9BAC0}">
-				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.exe" />
-				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.dll" />
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.exe"  Checksum="yes" />
+				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.dll"  Checksum="yes" />
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.runtimeconfig.json" />
 				<File  Source="..\bin\release\net8.0-windows\kat-pcgw-nexus.deps.json" />
 				<File  Source="..\bin\release\net8.0-windows\MultimediaTimer.dll" />

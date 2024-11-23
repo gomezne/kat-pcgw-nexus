@@ -7,24 +7,41 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <TextBox x:Name="JsonTextBox" 
-                 Grid.Row="0"
-                 HorizontalAlignment="Stretch" 
-                 VerticalAlignment="Top" 
-                 TextWrapping="NoWrap" 
-                 IsReadOnly="True" 
-                 VerticalScrollBarVisibility="Disabled" 
-                 HorizontalScrollBarVisibility="Auto" 
-                 Margin="0" 
-                 Height="Auto" />
+                Grid.Row="0" Grid.Column="0"
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Top" 
+                TextWrapping="NoWrap" 
+                IsReadOnly="True" 
+                VerticalScrollBarVisibility="Disabled" 
+                HorizontalScrollBarVisibility="Auto" 
+                Margin="0" 
+                Width="Auto"
+                Height="Auto" />
+        <ComboBox x:Name="IpAddressComboBox" Grid.Row="0" Grid.Column="1" Width="200">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding AddressStr}" TextWrapping="NoWrap" />
+                        <TextBlock Text=" (" />
+                        <TextBlock Text="{Binding AdapterName}" TextWrapping="NoWrap" />
+                        <TextBlock Text=")" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
 
         <TextBox x:Name="ReceivedDataTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                 Grid.Row="1" TextWrapping="Wrap" IsReadOnly="True"/>
+                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" TextWrapping="Wrap" IsReadOnly="True"/>
 
     </Grid>
 </Window>

@@ -19,20 +19,6 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace kat_pcgw_nexus
 {
-    public class LocalIPAddress
-    {
-        public static string? GetLocalIPAddress()
-        {
-            string hostName = Dns.GetHostName();
-            var addresses = Dns.GetHostAddresses(hostName);
-
-            // Filter for an IPv4 address that is not a loopback or link-local address
-            var localAddress = addresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip));
-
-            return localAddress?.ToString();
-        }
-    }
-
     public sealed class NexusService
     {
         private static readonly Lazy<NexusService> instance = new Lazy<NexusService>(() => new NexusService());
@@ -40,6 +26,8 @@ namespace kat_pcgw_nexus
 
         public event Action<string>? BroadcastMessageReceived;
 
+        private string LocalIPAddress = "";
+        private IPAddress NetInterface = IPAddress.Any;
         private UdpClient? BroadcastUdpClient;
         private UdpClient? NexusUdpClient;
         private MultimediaTimer.Timer broadcastTimer = new();
@@ -54,17 +42,31 @@ namespace kat_pcgw_nexus
             clientTimer.Elapsed += ClientTimer_Elapsed;
         }
 
-        public void StartListening()
+        public static string? DetectLocalIPAddress()
         {
+            string hostName = Dns.GetHostName();
+            var addresses = Dns.GetHostAddresses(hostName);
+
+            // Filter for an IPv4 address that is not a loopback or link-local address
+            var localAddress = addresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip));
+
+            return localAddress?.ToString();
+        }
+
+        public void StartListening(IPAddress network)
+        {
+            NetInterface = network;
+            LocalIPAddress = network.Equals(IPAddress.Any) ? DetectLocalIPAddress() ?? "127.0.0.1" : network.ToString();
             if (BroadcastUdpClient == null)
             {
-                BroadcastUdpClient = new UdpClient(1181);
+                BroadcastUdpClient = new UdpClient(new IPEndPoint(NetInterface, 1181));
+                BroadcastUdpClient.EnableBroadcast = true;
                 BroadcastUdpClient!.BeginReceive(OnBroadcastPacket, null);
                 broadcastTimer.Start();
             }
             if (NexusUdpClient == null)
             {
-                NexusUdpClient = new UdpClient(3500);
+                NexusUdpClient = new UdpClient(new IPEndPoint(NetInterface, 3500));
                 NexusUdpClient!.BeginReceive(OnNexusUdpPacket, null);
                 // We do not start immediately, we'll start when client knocks on our door
             }
@@ -229,7 +231,7 @@ namespace kat_pcgw_nexus
 
         private void BroadcastTimer_Elapsed(object? sender, EventArgs e)
         {
-            var nexus = new KAT_NEXUS_PACKET { devicesCount = 0, nexusIPv4 = LocalIPAddress.GetLocalIPAddress() ?? "127.0.0.1" };
+            var nexus = new KAT_NEXUS_PACKET { devicesCount = 0, nexusIPv4 = LocalIPAddress };
             var dev = new KAT_NEXUS_DEVICE { }.Initialize();
 
             if (KATSDKInterfaceHelper.ListenCount() > 0)
@@ -460,7 +462,7 @@ namespace kat_pcgw_nexus
         private bool Cmd_ClientDisconnect(byte[] receivedBytes, IPEndPoint remoteEndPoint)
         {
             if (receivedBytes.Length < 7) return false;
-            if (!ClientAddress.Equals(remoteEndPoint.Address))
+            if (ClientAddress?.Equals(remoteEndPoint.Address) != true)
                 return false;
 
             var port = BitConverter.ToInt32(receivedBytes, 3);
