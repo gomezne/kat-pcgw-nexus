@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -234,26 +235,52 @@ namespace kat_pcgw_nexus
             var nexus = new KAT_NEXUS_PACKET { devicesCount = 0, nexusIPv4 = LocalIPAddress };
             var dev = new KAT_NEXUS_DEVICE { }.Initialize();
 
-            if (KATSDKInterfaceHelper.ListenCount() > 0)
+            if (!Monitor.TryEnter(this))
             {
-                KATSDKInterfaceHelper.GetDeviceConnectionStatus();
+                return;
+            }
+            try {
+                if (KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION == null ||
+                    IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber == null)
+                {
+                    if (KATSDKInterfaceHelper.ListenCount() > 0)
+                    {
+                        KATSDKInterfaceHelper.GetDeviceConnectionStatus();
 
-                if (KATSDKInterfaceHelper.walk_c2_connect)
-                {
-                    ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2;
-                    nexus.devicesCount = 1;
+                        if (KATSDKInterfaceHelper.walk_c2_connect)
+                        {
+                            ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2;
+                            nexus.devicesCount = 1;
+                        }
+                        else if (KATSDKInterfaceHelper.walk_c2_core_connect)
+                        {
+                            ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2_core;
+                            nexus.devicesCount = 1;
+                        }
+                    }
+                    if (nexus.devicesCount > 0)
+                    {
+                        KATSDKInterfaceHelper.GetDeviceConnectionStatus();
+
+                        if (TreadmillSn != IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber
+                            || KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION == null)
+                        {
+                            IBizLibrary.KATSDKInterfaceHelper.InitKATSharedMemory();
+                        }
+                        TreadmillSn = IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber;
+                    }
                 }
-                else if (KATSDKInterfaceHelper.walk_c2_core_connect)
+                else
                 {
-                    ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2_core;
                     nexus.devicesCount = 1;
                 }
             }
+            finally
+            {
+                Monitor.Exit(this);
+            }
+
             if (nexus.devicesCount > 0) {
-                KATSDKInterfaceHelper.GetDeviceConnectionStatus();
-
-                TreadmillSn = IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber;
-
                 dev.serialNo = TreadmillSn;
                 dev.numClientPorts = (byte)ClientPorts.Count;
                 ClientPorts.CopyTo(dev.clientPorts);
@@ -261,10 +288,6 @@ namespace kat_pcgw_nexus
                 dev.vid = (ushort)IBizLibrary.KATSDKInterfaceHelper.objKATModels.vid;
                 dev.pid = (ushort)IBizLibrary.KATSDKInterfaceHelper.objKATModels.pid;
                 dev.nexusPort = 3500;
-                if (KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION == null)
-                {
-                    KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION = new KAT_MemoryMap("KAT_DEVICE_CONNECTION_" + KATSDKInterfaceHelper.objKATModels.serialNumber, 1024U);
-                }
                 KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION_Model deviceConnectionModel = KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION_Read();
                 dev.sensorPackets[0] = Convert.ToInt32(deviceConnectionModel.sensorStatus[0]);
                 dev.sensorPackets[1] = Convert.ToInt32(deviceConnectionModel.sensorStatus[1]);
