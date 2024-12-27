@@ -257,6 +257,16 @@ namespace kat_pcgw_nexus
                             ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2_core;
                             nexus.devicesCount = 1;
                         }
+                        else if (KATSDKInterfaceHelper.loco_s_connect)
+                        {
+                            ComUtility.KATDevice = ComUtility.KATDeviceType.loco_s;
+                            nexus.devicesCount = 1;
+                        }
+                        else if (KATSDKInterfaceHelper.loco_connect)
+                        {
+                            ComUtility.KATDevice = ComUtility.KATDeviceType.loco;
+                            nexus.devicesCount = 1;
+                        }
                     }
                     if (nexus.devicesCount > 0)
                     {
