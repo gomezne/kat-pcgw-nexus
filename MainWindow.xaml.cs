@@ -66,7 +66,6 @@ namespace kat_pcgw_nexus
 
         public MainWindow()
         {
-            Directory.SetCurrentDirectory("C:\\Program Files (x86)\\KAT Gateway\\");
             InitializeComponent();
             IpAddressComboBox.SelectionChanged += IpAddressComboBox_SelectionChanged;
             PopulateIpAddressComboBox(NexusService.DetectLocalIPAddress()??"127.0.0.1");
@@ -118,7 +117,7 @@ namespace kat_pcgw_nexus
                 var fieldValue = parsedJson.RootElement.GetProperty("data")[0].GetProperty("nexusVersion").GetString() ?? "{Error}";
 
                 var isVerOkay = "";
-                if (fieldValue == "2.1.7" || fieldValue == "2.1.5")
+                if (fieldValue == "2.1.6" || fieldValue == "2.1.5")
                 {
                     isVerOkay = "[All good] ";
                 }
