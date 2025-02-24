@@ -1,5 +1,5 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.2.0.0" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
+	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.5.0.0" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
 		<MediaTemplate EmbedCab="yes" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />

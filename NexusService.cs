@@ -34,6 +34,8 @@ namespace kat_pcgw_nexus
         private MultimediaTimer.Timer broadcastTimer = new();
         private MultimediaTimer.Timer clientTimer = new();
         private NexusService() {
+            System.Environment.SetEnvironmentVariable("PATH", (System.Environment.GetEnvironmentVariable("PATH") ?? "") + ";C:\\Program Files (x86)\\KAT Gateway");
+
             broadcastTimer.Interval = TimeSpan.FromMilliseconds(1000.0); // Once per second
             broadcastTimer.Resolution = TimeSpan.FromMilliseconds(100); // We don't need high precision there
             broadcastTimer.Elapsed += BroadcastTimer_Elapsed;
@@ -197,7 +199,12 @@ namespace kat_pcgw_nexus
                         for (int i = 0; i < header.devicesCount; i++)
                         {
                             var dev = ReadPtrStructAndAdvance<KAT_NEXUS_DEVICE>(ref ptr);
-                            message += $"[:{dev.nexusPort} {dev.serialNo} @ {dev.lastUpdate}]";
+                            var problem = "";
+                            if (dev.sensorPackets[0] < 50) problem += ":dir";
+                            if (dev.sensorPackets[1] < 50) problem += ":left";
+                            if (dev.sensorPackets[2] < 50) problem += ":right";
+                            problem = (problem=="") ? "OK" : ("no signal" + problem);
+                            message += $"[:{dev.nexusPort} {dev.serialNo} @ {dev.lastUpdate} @ ({dev.sensorPackets[0]}:{dev.sensorPackets[1]}:{dev.sensorPackets[2]}:{problem})]";
                         }
                     }
                     finally
