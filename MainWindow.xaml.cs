@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Net.NetworkInformation;
 using System.Windows.Controls;
+using System.Reflection;
 
 
 namespace kat_pcgw_nexus
@@ -71,6 +72,9 @@ namespace kat_pcgw_nexus
             PopulateIpAddressComboBox(NexusService.DetectLocalIPAddress()??"127.0.0.1");
             Loaded += MainWindow_Loaded; // Attach the event handler
             NexusService.Instance.BroadcastMessageReceived += OnMessageReceived;
+            // Retrieve version information
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown version";
+            this.Title = $"kat_pcgw_nexus - Version {version}";
         }
 
         private void IpAddressComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
