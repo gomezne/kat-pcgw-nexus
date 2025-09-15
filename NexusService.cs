@@ -254,7 +254,12 @@ namespace kat_pcgw_nexus
                     {
                         KATSDKInterfaceHelper.GetDeviceConnectionStatus();
 
-                        if (KATSDKInterfaceHelper.walk_c2_connect)
+                        if (KATSDKInterfaceHelper.walk_c2_plus_enhanced_connect)
+                        {
+                            ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2_plus_enhanced;
+                            nexus.devicesCount = 1;
+                        }
+                        else if (KATSDKInterfaceHelper.walk_c2_connect)
                         {
                             ComUtility.KATDevice = ComUtility.KATDeviceType.walk_c2;
                             nexus.devicesCount = 1;
