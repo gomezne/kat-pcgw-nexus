@@ -480,18 +480,12 @@ namespace kat_pcgw_nexus
 
                 // offset 0x58 (+ 88) -- KAT_DEVICE_CALIBRATION_CONFIG_ struct
                 // SKIPPED -- looks like for KatWalkC, not C2/C2Core
-                try
+                if (KATSDKInterfaceHelper.walk_c_connect)
                 {
-                    if (KATSDKInterfaceHelper.walk_c_connect)
-                    {
-                        var ptr = gch.AddrOfPinnedObject() + 88;
-                        var calibrationConfig = ReadPtrStructAndAdvance<KATCalibrationConfigHelper.CalibrationConfig>(ref ptr);
-                        if (ptr - gch.AddrOfPinnedObject() != 109) return false;
-                        KATCalibrationConfigHelper.SetCalibrationConfig(TreadmillSn, calibrationConfig);
-                    }
-                }
-                catch (Exception e) {
-                    // well, i don't know what to do here, so ignore.
+                    var ptr = gch.AddrOfPinnedObject() + 88;
+                    var calibrationConfig = ReadPtrStructAndAdvance<KATCalibrationConfigHelper.CalibrationConfig>(ref ptr);
+                    if (ptr - gch.AddrOfPinnedObject() != 109) return false;
+                    KATCalibrationConfigHelper.SetCalibrationConfig(TreadmillSn, calibrationConfig);
                 }
 
                 // offset 0x6d (+109) -- KAT_CALIBRATIONDATA_ struct

@@ -1,5 +1,5 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.5.1" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
+	<Package Name="kat-pcgw-nexus" Language="1033" Version="1.5.2" Manufacturer="datacompboy" UpgradeCode="e9aa4e67-c369-4609-aa27-a8beaaffe150" InstallerVersion="200">
 		<MediaTemplate EmbedCab="yes" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -8,7 +8,7 @@
 			<RegistrySearch Id="ServiceInstalledSearch" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\KAT Gateway Service" Name="ImagePath" Type="raw" />
 		</Property>
 
-		<Launch Condition="SERVICE_INSTALLED or Installed" Message="The required service 'KAT Gateway Service' is not installed. Please install the KAT Gateway 2.2.7 or greater. [Installed] OR [SERVICE_INSTALLED]" />
+		<Launch Condition="SERVICE_INSTALLED or Installed" Message="The required service 'KAT Gateway Service' is not installed. Please install the KAT Gateway 2.4.2 or greater. [Installed] OR [SERVICE_INSTALLED]" />
 
 		<CustomAction Id="SetInstallDir" Script="jscript" ScriptSourceFile="SetInstallDir.js" />
 
