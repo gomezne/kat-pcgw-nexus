@@ -141,7 +141,7 @@ namespace kat_pcgw_nexus
                 var fieldValue = parsedJson.RootElement.GetProperty("data")[0].GetProperty("nexusVersion").GetString() ?? "{Error}";
 
                 var isVerOkay = "";
-                if (fieldValue == "2.1.6" || fieldValue == "2.1.5")
+                if (fieldValue = "2.1.7")
                 {
                     isVerOkay = "[All good] ";
                 }
