@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Net.NetworkInformation;
 using System.Windows.Controls;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace kat_pcgw_nexus
 {
@@ -32,7 +33,7 @@ namespace kat_pcgw_nexus
         static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
         private void DisableSleepState()
         {
-            SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+            SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
             OnMessageReceived("Sleep disabled while application is running.");
         }
 
