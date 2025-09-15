@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Net.NetworkInformation;
 using System.Windows.Controls;
 using System.Reflection;
-using System.Runtime.InteropServices;
+
 
 namespace kat_pcgw_nexus
 {
@@ -18,25 +18,6 @@ namespace kat_pcgw_nexus
     /// </summary>
     public partial class MainWindow : Window
     {
-        [FlagsAttribute]
-        public enum EXECUTION_STATE : uint
-        {
-            ES_AWAYMODE_REQUIRED = 0x00000040,
-            ES_CONTINUOUS = 0x80000000,
-            ES_DISPLAY_REQUIRED = 0x00000002,
-            ES_SYSTEM_REQUIRED = 0x00000001
-            // Legacy flag, should not be used.
-            // ES_USER_PRESENT = 0x00000004
-        }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
-        private void DisableSleepState()
-        {
-            SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
-            OnMessageReceived("Sleep disabled while application is running.");
-        }
-
         private static readonly string JsonUrl = "https://gatewayservice.katvr.com/api/v1/nexus/lists";
 
         private void PopulateIpAddressComboBox(string CurrentIp)
@@ -90,7 +71,6 @@ namespace kat_pcgw_nexus
             IpAddressComboBox.SelectionChanged += IpAddressComboBox_SelectionChanged;
             PopulateIpAddressComboBox(NexusService.DetectLocalIPAddress()??"127.0.0.1");
             Loaded += MainWindow_Loaded; // Attach the event handler
-            DisableSleepState();
             NexusService.Instance.BroadcastMessageReceived += OnMessageReceived;
             // Retrieve version information
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown version";
