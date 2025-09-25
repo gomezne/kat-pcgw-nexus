@@ -93,7 +93,7 @@ namespace kat_pcgw_nexus
             NexusService.Instance.IsConnected += Instance_IsConnected;
             // Retrieve version information
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown version";
-            this.Title = $"kat_pcgw_nexus - Version {version}";
+            statusBarVersion.Text = $"v{version}"; ;
         }
 
         private void Instance_IsConnected(bool isConnected)

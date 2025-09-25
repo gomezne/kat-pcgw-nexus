@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:kat_pcgw_nexus"
         mc:Ignorable="d"
-        Title="KAT Nexus Simulator" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize">
+        Title="KAT Nexus Simulator" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -28,7 +28,7 @@
                   Grid.Row="0" 
                   Grid.Column="0" 
                   Grid.ColumnSpan="2"
-                  Width="200"
+                  Width="250"
                   Margin="0,0,0,5">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -60,8 +60,11 @@
         <StatusBar x:Name="statusBar" 
                    Grid.Row="1"
                    Grid.Column="0">
-            <StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Left">
                 <TextBlock x:Name="statusBarMsg" Text="No connected devices"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="statusBarVersion"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
