@@ -26,6 +26,7 @@ namespace kat_pcgw_nexus
         public static NexusService Instance => instance.Value;
 
         public event Action<string>? BroadcastMessageReceived;
+        public event Action<bool>? IsConnected;
 
         private string LocalIPAddress = "";
         private IPAddress NetInterface = IPAddress.Any;
@@ -175,6 +176,8 @@ namespace kat_pcgw_nexus
 
         private void OnBroadcastPacket(IAsyncResult ar)
         {
+            int deviceCount = 0;
+
             try
             {
                 IPEndPoint? remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -195,7 +198,8 @@ namespace kat_pcgw_nexus
                     {
                         var ptr = gch.AddrOfPinnedObject() + 2;
                         var header = ReadPtrStructAndAdvance<KAT_NEXUS_PACKET>(ref ptr);
-                        message = "Found Nexus: " + header.nexusIPv4 + " (" + header.devicesCount + ")";
+                        deviceCount = header.devicesCount;
+                        message = "Found Nexus: " + header.nexusIPv4 + " (" + deviceCount + ")";
                         for (int i = 0; i < header.devicesCount; i++)
                         {
                             var dev = ReadPtrStructAndAdvance<KAT_NEXUS_DEVICE>(ref ptr);
@@ -223,6 +227,8 @@ namespace kat_pcgw_nexus
             {
                 // M'kay5
             }
+
+            IsConnected?.Invoke(deviceCount > 0);
         }
 
         string TreadmillSn = ""; // The serial No of treadmill we connected to

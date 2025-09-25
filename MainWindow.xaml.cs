@@ -18,6 +18,9 @@ namespace kat_pcgw_nexus
     /// </summary>
     public partial class MainWindow : Window
     {
+        private LogWindow? logWindow;
+        private bool isConnectedState;
+
         [FlagsAttribute]
         public enum EXECUTION_STATE : uint
         {
@@ -34,10 +37,7 @@ namespace kat_pcgw_nexus
         private void DisableSleepState()
         {
             SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
-            OnMessageReceived("Sleep disabled while application is running.");
         }
-
-        private static readonly string JsonUrl = "https://gatewayservice.katvr.com/api/v1/nexus/lists";
 
         private void PopulateIpAddressComboBox(string CurrentIp)
         {
@@ -89,12 +89,23 @@ namespace kat_pcgw_nexus
             InitializeComponent();
             IpAddressComboBox.SelectionChanged += IpAddressComboBox_SelectionChanged;
             PopulateIpAddressComboBox(NexusService.DetectLocalIPAddress()??"127.0.0.1");
-            Loaded += MainWindow_Loaded; // Attach the event handler
             DisableSleepState();
-            NexusService.Instance.BroadcastMessageReceived += OnMessageReceived;
+            NexusService.Instance.IsConnected += Instance_IsConnected;
             // Retrieve version information
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown version";
             this.Title = $"kat_pcgw_nexus - Version {version}";
+        }
+
+        private void Instance_IsConnected(bool isConnected)
+        {
+            if (isConnected != isConnectedState)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    statusBarMsg.Text = isConnected ? "Connected to devices" : "No connected devices";
+                });
+                isConnectedState = isConnected;
+            }
         }
 
         private void IpAddressComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -108,60 +119,35 @@ namespace kat_pcgw_nexus
             }
         }
 
-        private void OnMessageReceived(string message)
-        {
-            // Update the UI on the main thread
-            Dispatcher.Invoke(() =>
-            {
-                ReceivedDataTextBox.AppendText(message + Environment.NewLine);
-                ReceivedDataTextBox.ScrollToEnd();
-            });
-        }
-
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             NexusService.Instance.StopListening();
             base.OnClosing(e);
         }
 
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void ViewLogBtn_Click(object sender, RoutedEventArgs e)
         {
-            await FetchAndDisplayJsonAsync();
-        }
-
-        private async Task FetchAndDisplayJsonAsync()
-        {
-            try
+            if (logWindow == null)
             {
-                using var client = new HttpClient();
-                string json = await client.GetStringAsync(JsonUrl);
-
-                // Optionally parse JSON if you're looking for specific fields
-                var parsedJson = JsonDocument.Parse(json);
-                var fieldValue = parsedJson.RootElement.GetProperty("data")[0].GetProperty("nexusVersion").GetString() ?? "{Error}";
-
-                var isVerOkay = "";
-                if (fieldValue == "2.1.7")
+                logWindow = new LogWindow
                 {
-                    isVerOkay = "[All good] ";
-                }
-                else if (fieldValue.StartsWith("2.1."))
-                {
-                    isVerOkay = "[Should be OK] ";
-                }
-                else
-                {
-                    isVerOkay = "[WARNING] ";
-                }
-
-                // Update TextBox
-                JsonTextBox.Text = $"{isVerOkay}Upstream Nexus version: {fieldValue}. This application should be good for 2.1.x versions.";
+                    Owner = this
+                };
             }
-            catch (Exception ex)
+
+            if (logWindow.Visibility != Visibility.Visible)
             {
-                JsonTextBox.Text = $"Error fetching upstream Nexus: {ex.Message}";
+                logWindow.Show();
+            }
+            else
+            {
+                logWindow.Activate();
             }
         }
 
+        private void CloseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

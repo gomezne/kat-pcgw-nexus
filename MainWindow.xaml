@@ -5,43 +5,64 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:kat_pcgw_nexus"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="KAT Nexus Simulator" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <TextBox x:Name="JsonTextBox" 
-                Grid.Row="0" Grid.Column="0"
-                HorizontalAlignment="Stretch" 
-                VerticalAlignment="Top" 
-                TextWrapping="NoWrap" 
-                IsReadOnly="True" 
-                VerticalScrollBarVisibility="Disabled" 
-                HorizontalScrollBarVisibility="Auto" 
-                Margin="0" 
-                Width="Auto"
-                Height="Auto" />
-        <ComboBox x:Name="IpAddressComboBox" Grid.Row="0" Grid.Column="1" Width="200">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding AddressStr}" TextWrapping="NoWrap" />
-                        <TextBlock Text=" (" />
-                        <TextBlock Text="{Binding AdapterName}" TextWrapping="NoWrap" />
-                        <TextBlock Text=")" />
-                    </StackPanel>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+            <ComboBox x:Name="IpAddressComboBox" 
+                  Grid.Row="0" 
+                  Grid.Column="0" 
+                  Grid.ColumnSpan="2"
+                  Width="200"
+                  Margin="0,0,0,5">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding AddressStr}" TextWrapping="NoWrap" />
+                            <TextBlock Text=" (" />
+                            <TextBlock Text="{Binding AdapterName}" TextWrapping="NoWrap" />
+                            <TextBlock Text=")" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
-        <TextBox x:Name="ReceivedDataTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" TextWrapping="Wrap" IsReadOnly="True"/>
-
+            <Button x:Name="ViewLogBtn" 
+                Content="View Log"
+                Grid.Row="1" 
+                Grid.Column="0" 
+                Margin="0,0,2.5,0" 
+                Click="ViewLogBtn_Click"/>
+            <Button x:Name="CloseBtn" 
+                Content="Close"
+                Grid.Row="1" 
+                Grid.Column="1"
+                Padding="5" 
+                Margin="2.5,0,0,0" 
+                Click="CloseBtn_Click" 
+                Grid.ColumnSpan="2"/>
+        </Grid>
+        <StatusBar x:Name="statusBar" 
+                   Grid.Row="1"
+                   Grid.Column="0">
+            <StatusBarItem>
+                <TextBlock x:Name="statusBarMsg" Text="No connected devices"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
