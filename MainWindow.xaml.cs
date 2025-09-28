@@ -102,7 +102,7 @@ namespace kat_pcgw_nexus
             {
                 Dispatcher.Invoke(() =>
                 {
-                    statusBarMsg.Text = isConnected ? "Connected to devices" : "No connected devices";
+                    statusBarMsg.Text = isConnected ? "Connected to KAT devices" : "No connected KAT devices";
                 });
                 isConnectedState = isConnected;
             }

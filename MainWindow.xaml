@@ -14,22 +14,27 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Margin="10">
+        <Grid Margin="10,5,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-
+            <Label Content="Set address for discovery by Nexus Gateway:" 
+                   Grid.Row="0" 
+                   Grid.Column="0" 
+                   Grid.ColumnSpan="2"  
+                   Margin="-5,0,0,1"/>
             <ComboBox x:Name="IpAddressComboBox" 
-                  Grid.Row="0" 
-                  Grid.Column="0" 
-                  Grid.ColumnSpan="2"
-                  Width="250"
-                  Margin="0,0,0,5">
+                      Grid.Row="1" 
+                      Grid.Column="0" 
+                      Grid.ColumnSpan="2"
+                      Width="250"
+                      Margin="0,0,0,5">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -44,13 +49,13 @@
 
             <Button x:Name="ViewLogBtn" 
                 Content="View Log"
-                Grid.Row="1" 
+                Grid.Row="2" 
                 Grid.Column="0" 
                 Margin="0,0,2.5,0" 
                 Click="ViewLogBtn_Click"/>
             <Button x:Name="CloseBtn" 
                 Content="Close"
-                Grid.Row="1" 
+                Grid.Row="2" 
                 Grid.Column="1"
                 Padding="5" 
                 Margin="2.5,0,0,0" 
@@ -61,7 +66,7 @@
                    Grid.Row="1"
                    Grid.Column="0">
             <StatusBarItem HorizontalAlignment="Left">
-                <TextBlock x:Name="statusBarMsg" Text="No connected devices"/>
+                <TextBlock x:Name="statusBarMsg" Text="No connected KAT devices"/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <TextBlock x:Name="statusBarVersion"/>
