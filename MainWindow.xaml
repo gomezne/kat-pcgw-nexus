@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:kat_pcgw_nexus"
         mc:Ignorable="d"
-        Title="KAT Nexus Simulator" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" WindowStyle="ToolWindow">
+        Title="KAT PCGW Nexus" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
