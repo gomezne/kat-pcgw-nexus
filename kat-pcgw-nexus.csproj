@@ -17,6 +17,7 @@
 	<AssemblyVersion>1.5.2</AssemblyVersion>
 	<FileVersion>1.5.2</FileVersion>
 	<Version>1.5.2</Version>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   
   <ItemGroup>
@@ -35,7 +36,7 @@
     <PackageReference Include="PandocTasks" Version="0.1.2" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
     <Reference Include="IBizLibrary">
       <HintPath>..\..\..\..\..\Program Files (x86)\KAT Gateway\IBizLibrary.dll</HintPath>
     </Reference>
@@ -44,7 +45,7 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
     <Pandoc Include="README.md" />
   </ItemGroup>
 

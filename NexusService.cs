@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 using System.Windows.Xps;
-using IBizLibrary;
+using IBizLibraryKAT = IBizLibrary.KATSDKInterfaceHelper;
 using KAT_Helper;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -248,7 +248,7 @@ namespace kat_pcgw_nexus
             }
             try {
                 if (KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION == null ||
-                    IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber == null)
+                    IBizLibraryKAT.objKATModels.serialNumber == null)
                 {
                     if (KATSDKInterfaceHelper.ListenCount() > 0)
                     {
@@ -289,12 +289,12 @@ namespace kat_pcgw_nexus
                     {
                         KATSDKInterfaceHelper.GetDeviceConnectionStatus();
 
-                        if (TreadmillSn != IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber
+                        if (TreadmillSn != IBizLibraryKAT.objKATModels.serialNumber
                             || KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION == null)
                         {
-                            IBizLibrary.KATSDKInterfaceHelper.InitKATSharedMemory();
+                            IBizLibraryKAT.InitKATSharedMemory();
                         }
-                        TreadmillSn = IBizLibrary.KATSDKInterfaceHelper.objKATModels.serialNumber;
+                        TreadmillSn = IBizLibraryKAT.objKATModels.serialNumber;
                     }
                 }
                 else
@@ -312,8 +312,8 @@ namespace kat_pcgw_nexus
                 dev.numClientPorts = (byte)ClientPorts.Count;
                 ClientPorts.CopyTo(dev.clientPorts);
                 dev.clientIPv4 = ClientAddress?.ToString() ?? "";
-                dev.vid = (ushort)IBizLibrary.KATSDKInterfaceHelper.objKATModels.vid;
-                dev.pid = (ushort)IBizLibrary.KATSDKInterfaceHelper.objKATModels.pid;
+                dev.vid = (ushort)IBizLibraryKAT.objKATModels.vid;
+                dev.pid = (ushort)IBizLibraryKAT.objKATModels.pid;
                 dev.nexusPort = 3500;
                 KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION_Model deviceConnectionModel = KATSDKInterfaceHelper.KAT_DEVICE_CONNECTION_Read();
                 dev.sensorPackets[0] = Convert.ToInt32(deviceConnectionModel.sensorStatus[0]);

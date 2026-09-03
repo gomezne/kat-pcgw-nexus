@@ -1,4 +1,4 @@
-<Project Sdk="WixToolset.Sdk/5.0.2">
+<Project Sdk="WixToolset.Sdk/5.0.2" Condition="'$(OS)' == 'Windows_NT'">
   <PropertyGroup>
     <OutputName>kat-pcgw-nexus</OutputName>
     <OutputType>Package</OutputType>
